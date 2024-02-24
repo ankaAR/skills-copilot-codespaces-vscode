@@ -1,36 +1,50 @@
 // Create a web server
 
-const http = require('http');
-const fs = require('fs');
-const url = require('url');
-const path = require('path');
+const express = require('express');
+const app = express();
+const comments = require('./comments.json');
 
-http.createServer((req, res) => {
-    // Parse the request containing file name
-    const pathname = url.parse(req.url).pathname;
-    // Print the name of the file for which request is made.
-    console.log("Request for " + pathname + " received.");
+app.use(express.static('public'));
 
-    // Read the requested file content from file system
-    fs.readFile(pathname.substr(1), (err, data) => {
-        if (err) {
-            console.log(err);
-            // HTTP Status: 404 : NOT FOUND
-            // Content Type: text/plain
-            res.writeHead(404, {'Content-Type': 'text/html'});
-        } else {
-            // Page found
-            // HTTP Status: 200 : OK
-            // Content Type: text/plain
-            res.writeHead(200, {'Content-Type': 'text/html'});
+app.get('/comments', (req, res) => {
+  res.json(comments);
+});
 
-            // Write the content of the file to response body
-            res.write(data.toString());
-        }
-        // Send the response body
-        res.end();
-    });
-}).listen(8081);
+app.listen(3000, () => {
+  console.log('Server is up and running on port 3000');
+});
 
-// Console will print the message
-console.log('Server running at http://
+// Path: public/index.html
+// Create a web page
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Comments</title>
+  </head>
+  <body>
+    <h1>Comments</h1>
+    <ul id="comments"></ul>
+    <script>
+      fetch('/comments')
+        .then(response => response.json())
+        .then(comments => {
+          const commentsList = document.getElementById('comments');
+          comments.forEach(comment => {
+            const li = document.createElement('li');
+            li.innerText = comment.name;
+            commentsList.appendChild(li);
+          });
+        });
+    </script>
+  </body>
+</html>
+
+// Path: comments.json
+// Create a JSON file
+
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "
